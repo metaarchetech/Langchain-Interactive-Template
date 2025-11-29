@@ -7,13 +7,13 @@ import * as THREE from 'three';
  * 3D audio-reactive sphere with gradient colors using Three.js
  * - Noise-distorted sphere with customizable gradient colors
  * - Audio-reactive animations that respond to sound
- * - Mouse interaction: middle button (scroll wheel) drag to rotate with damping, scroll to zoom
+ * - Mouse interaction: middle button drag to rotate with damping, scroll to zoom
  * - Smooth damping effect for natural rotation feel
  * - Pauses when window loses focus (performance optimization)
  * - Gracefully degrades if WebGL is not supported
  * 
  * Future expansion: Can be refactored to support multiple scenes
- * by extracting particle logic to three/scenes/
+ * by extracting sphere logic to three/scenes/
  */
 function ThreeBackground({ 
   audioIntensity = 0,
@@ -140,27 +140,27 @@ function ThreeBackground({
     }
 
     // ===== Lighting Setup =====
-    // Main directional light (key light) - very bright
-    const keyLight = new THREE.DirectionalLight(0xffffff, 5.0);
+    // Main directional light (key light) - neutral white
+    const keyLight = new THREE.DirectionalLight(0xffffff, 4.5);
     keyLight.position.set(40, 60, 40);
     scene.add(keyLight);
 
-    // Fill light (blue tone from top)
-    const fillLight = new THREE.DirectionalLight(0xccddff, 3.0);
+    // Fill light (warm white from top)
+    const fillLight = new THREE.DirectionalLight(0xfff8f0, 2.5);
     fillLight.position.set(-40, 40, -30);
     scene.add(fillLight);
 
-    // Rim light (pink accent from bottom)
-    const rimLight = new THREE.DirectionalLight(0xffccee, 3.5);
+    // Rim light (neutral white from bottom)
+    const rimLight = new THREE.DirectionalLight(0xffffff, 3.0);
     rimLight.position.set(0, -40, -60);
     scene.add(rimLight);
 
-    // Ambient light (much brighter ambient)
-    const ambientLight = new THREE.AmbientLight(0xccccdd, 2.0);
+    // Ambient light (neutral warm ambient)
+    const ambientLight = new THREE.AmbientLight(0xfff8f5, 2.0);
     scene.add(ambientLight);
     
-    // Add point light for extra glow (much brighter)
-    const pointLight = new THREE.PointLight(0xeeddff, 4.0, 100);
+    // Add point light (warm glow)
+    const pointLight = new THREE.PointLight(0xfffaf0, 3.5, 100);
     pointLight.position.set(0, 0, 50);
     scene.add(pointLight);
 
