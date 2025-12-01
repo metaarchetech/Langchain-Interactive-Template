@@ -25,6 +25,7 @@ function App() {
   
   const messagesEndRef = useRef(null);
   const recognitionRef = useRef(null);
+  const silenceTimerRef = useRef(null); // Timer to detect silence
   const audioContextRef = useRef(null);
   const analyserRef = useRef(null);
 
@@ -66,6 +67,19 @@ function App() {
 
       // Update input with interim or final transcript
       setInput(finalTranscript || interimTranscript);
+
+      // Reset silence timer on every result
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      
+      // If we have some transcript, set a timer to auto-stop after silence
+      if (finalTranscript || interimTranscript) {
+        silenceTimerRef.current = setTimeout(() => {
+          if (recognitionRef.current) {
+            console.log('Silence detected, stopping recording...');
+            recognitionRef.current.stop();
+          }
+        }, 1200); // 1.2 seconds silence timeout
+      }
     };
 
     recognition.onerror = (event) => {
@@ -89,6 +103,11 @@ function App() {
 
     recognition.onend = () => {
       setIsRecording(false);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      
+      // If stopped and input exists, send it
+      // We rely on stopRecording's logic, but this is a safety fallback
+      // Note: stopRecording has a delay, so we might want to unify this.
     };
 
     recognitionRef.current = recognition;
@@ -97,6 +116,7 @@ function App() {
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
     };
   }, [isSpeechRecognitionSupported]);
 
@@ -202,8 +222,11 @@ function App() {
     
     try {
       recognitionRef.current.stop();
-      setIsRecording(false);
+      // setIsRecording(false) will be handled by onend
       
+      // Clear any silence timer
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+
       // Auto-send after a short delay to ensure transcript is captured
       setTimeout(() => {
         if (input.trim()) {
