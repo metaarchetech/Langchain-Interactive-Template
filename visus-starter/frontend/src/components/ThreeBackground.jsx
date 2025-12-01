@@ -176,10 +176,11 @@ function ThreeBackground({
       const sphereMaterial = new THREE.PointsMaterial({
         size: 0.4, // Particle size
         sizeAttenuation: true,
-        vertexColors: true,
+        vertexColors: true, // 確保使用漸層色
         transparent: true,
         opacity: 0.8,
-        blending: THREE.AdditiveBlending
+        blending: THREE.NormalBlending, // 改回正常混合，避免顏色過曝變黃
+        depthWrite: false // 避免粒子互相遮擋造成黑邊
       });
       
       sphere = new THREE.Points(sphereGeometry, sphereMaterial);
