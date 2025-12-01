@@ -1,4 +1,5 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage
@@ -6,6 +7,8 @@ from agent import app_graph
 from system_state import STATE
 from openai import OpenAI
 import base64
+import json
+import asyncio
 import os
 from config import OPENAI_API_KEY
 from connection import manager
@@ -20,7 +23,7 @@ app.add_middleware(
 # 初始化 OpenAI Client (用於 TTS)
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-class ChatRequest(BaseModel):
+class TTSRequest(BaseModel):
     text: str
 
 @app.post("/chat")
@@ -32,26 +35,27 @@ async def chat_endpoint(req: ChatRequest):
     ai_response = result["messages"][-1].content
     print(f"AI 回應: {ai_response}")
 
-    # 2. 生成語音 (TTS)
-    audio_base64 = None
+    # 2. 僅回傳文字和狀態 (不生成語音)
+    return {
+        "reply": ai_response,
+        "state": STATE
+    }
+
+@app.post("/tts")
+async def tts_endpoint(req: TTSRequest):
+    print(f"收到 TTS 請求: {req.text[:20]}...")
     try:
         response = client.audio.speech.create(
             model="tts-1",
-            voice="nova", # 女性聲音，親切感
-            input=ai_response
+            voice="nova",
+            input=req.text
         )
-        # 將二進制音頻轉換為 base64 字符串
+        # 回傳 Base64 音訊
         audio_base64 = base64.b64encode(response.content).decode('utf-8')
-        print("語音生成成功")
+        return {"audio": audio_base64}
     except Exception as e:
-        print(f"語音生成失敗: {e}")
-
-    # 3. 回傳：AI 回答 + 語音 + 最新系統狀態
-    return {
-        "reply": ai_response,
-        "audio": audio_base64, # Base64 編碼的 MP3
-        "state": STATE
-    }
+        print(f"TTS 生成失敗: {e}")
+        return {"error": str(e)}
 
 @app.websocket("/ws/omniverse")
 async def websocket_endpoint(websocket: WebSocket):

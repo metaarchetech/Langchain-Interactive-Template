@@ -78,7 +78,7 @@ function App() {
             console.log('Silence detected, stopping recording...');
             recognitionRef.current.stop();
           }
-        }, 1200); // 1.2 seconds silence timeout
+        }, 800); // 0.8 seconds silence timeout
       }
     };
 
@@ -141,16 +141,45 @@ function App() {
 
       const data = await response.json();
 
-      // Add AI Response to Chat
+      // Add AI Response to Chat (Text Immediately)
       setMessages(prev => [...prev, {
         role: 'assistant',
         content: data.reply
       }]);
 
-      // Play Audio if available with visualization
-      if (data.audio) {
-        try {
-          const audio = new Audio(`data:audio/mp3;base64,${data.audio}`);
+      // Fetch TTS separately (Parallel)
+      if (data.reply) {
+        // Start fetching audio immediately without blocking UI
+        fetch('http://localhost:8000/tts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: data.reply })
+        })
+        .then(res => res.json())
+        .then(ttsData => {
+            if (ttsData.audio) {
+                playAudio(ttsData.audio);
+            }
+        })
+        .catch(err => console.error("TTS Fetch Error:", err));
+      }
+
+      setIsLoading(false);
+
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: 'Error: Could not connect to server.'
+      }]);
+      setIsLoading(false);
+    }
+  };
+
+  // Helper function to play audio
+  const playAudio = async (base64Audio) => {
+      try {
+          const audio = new Audio(`data:audio/mp3;base64,${base64Audio}`);
           
           // Setup audio analysis
           if (!audioContextRef.current) {
@@ -158,6 +187,11 @@ function App() {
           }
           
           const audioContext = audioContextRef.current;
+          // Resume context if suspended (browser policy)
+          if (audioContext.state === 'suspended') {
+            await audioContext.resume();
+          }
+
           const analyser = audioContext.createAnalyser();
           analyser.fftSize = 256;
           analyserRef.current = analyser;
@@ -189,18 +223,6 @@ function App() {
           console.error("Audio playback failed:", audioError);
           setAudioIntensity(0);
         }
-      }
-
-      setIsLoading(false);
-
-    } catch (error) {
-      console.error('Error:', error);
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Error: Could not connect to server.'
-      }]);
-      setIsLoading(false);
-    }
   };
 
   // Voice Recording Handlers
