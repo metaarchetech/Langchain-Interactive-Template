@@ -24,7 +24,8 @@ function ThreeBackground({
     baseStrength: 4.0,
     audioBoost: 19,
     animSpeed: 0.01
-  }
+  },
+  displayMode = 'mesh' // 'mesh' or 'particles'
 }) {
   // ===== 1. State & Refs =====
   const mountRef = useRef(null);
@@ -168,19 +169,37 @@ function ThreeBackground({
     // Create sphere with high detail for smooth surface
     const sphereGeometry = new THREE.SphereGeometry(25, 64, 64);
     
-    // Use MeshStandardMaterial for realistic matte surface
-    const sphereMaterial = new THREE.MeshStandardMaterial({
-      color: 0xaa88ff, // Base purple-pink
-      metalness: 0.0,
-      roughness: 0.8, // Very matte surface
-      transparent: true,
-      opacity: 0.85, // Less transparent, more solid
-      emissive: 0x4433aa, // Subtle inner glow
-      emissiveIntensity: 0.3,
-      side: THREE.DoubleSide
-    });
+    let sphere;
     
-    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    if (displayMode === 'particles') {
+      // === PARTICLES MODE ===
+      const sphereMaterial = new THREE.PointsMaterial({
+        size: 0.4, // Particle size
+        sizeAttenuation: true,
+        vertexColors: true,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      
+      sphere = new THREE.Points(sphereGeometry, sphereMaterial);
+    } else {
+      // === MESH MODE (Default) ===
+      // Use MeshStandardMaterial for realistic matte surface
+      const sphereMaterial = new THREE.MeshStandardMaterial({
+        color: 0xaa88ff, // Base purple-pink
+        metalness: 0.0,
+        roughness: 0.8, // Very matte surface
+        transparent: true,
+        opacity: 0.85, // Less transparent, more solid
+        emissive: 0x4433aa, // Subtle inner glow
+        emissiveIntensity: 0.3,
+        side: THREE.DoubleSide,
+        vertexColors: true // Enable vertex colors
+      });
+      
+      sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    }
     
     // Add gradient effect with vertex colors
     const colors = [];
@@ -191,15 +210,14 @@ function ThreeBackground({
       const normalizedY = (y / 25 + 1) / 2; // Normalize to 0-1
       
       // Blue (top) to Pink (bottom) gradient - more vibrant
-      const r = 0.4 + normalizedY * 0.6; // 0.4 to 1.0 (stronger red at bottom)
-      const g = 0.6 - normalizedY * 0.4; // 0.6 to 0.2 (less green at bottom)
-      const b = 1.0 - normalizedY * 0.4; // 1.0 to 0.6 (less blue at bottom)
+      const r = (colorBottomRef.current.r + (colorTopRef.current.r - colorBottomRef.current.r) * normalizedY) / 255;
+      const g = (colorBottomRef.current.g + (colorTopRef.current.g - colorBottomRef.current.g) * normalizedY) / 255;
+      const b = (colorBottomRef.current.b + (colorTopRef.current.b - colorBottomRef.current.b) * normalizedY) / 255;
       
       colors.push(r, g, b);
     }
     
     sphereGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-    sphereMaterial.vertexColors = true;
     
     // Store original positions for noise calculation
     const originalPositions = new Float32Array(positionAttribute.count * 3);
@@ -445,7 +463,7 @@ function ThreeBackground({
       
       console.log('Cleanup complete');
     };
-  }, []);
+  }, [displayMode]);
 
   // ===== 9. Fallback Render (No WebGL) =====
   if (!hasWebGL) {

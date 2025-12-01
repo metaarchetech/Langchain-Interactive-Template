@@ -16,7 +16,9 @@ function VisualControls({
   shapeParams,
   onShapeParamsChange,
   isVisible,
-  onToggle
+  onToggle,
+  displayMode,
+  onDisplayModeChange
 }) {
   
   const sliderStyle = {
@@ -109,6 +111,19 @@ function VisualControls({
     marginBottom: '6px'
   };
 
+  const buttonStyle = (isActive) => ({
+    flex: 1,
+    padding: '6px 0',
+    background: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '2px',
+    color: isActive ? 'white' : 'rgba(255, 255, 255, 0.5)',
+    cursor: 'pointer',
+    fontFamily: 'JetBrains Mono, monospace',
+    fontSize: '10px',
+    transition: 'all 0.2s'
+  });
+
   return (
     <div style={containerStyle}>
       <button 
@@ -120,6 +135,25 @@ function VisualControls({
 
       {isVisible && (
         <>
+          {/* Display Mode Section */}
+          <div style={sectionStyle}>
+            <div style={{...labelStyle, marginBottom: '10px'}}>DISPLAY MODE</div>
+            <div style={{display: 'flex', gap: '5px'}}>
+              <button 
+                style={buttonStyle(displayMode === 'mesh')}
+                onClick={() => onDisplayModeChange('mesh')}
+              >
+                SOLID
+              </button>
+              <button 
+                style={buttonStyle(displayMode === 'particles')}
+                onClick={() => onDisplayModeChange('particles')}
+              >
+                PARTICLES
+              </button>
+            </div>
+          </div>
+
           {/* Color Gradient Section */}
           <div style={sectionStyle}>
             <div style={{...labelStyle, marginBottom: '10px'}}>COLOR GRADIENT</div>

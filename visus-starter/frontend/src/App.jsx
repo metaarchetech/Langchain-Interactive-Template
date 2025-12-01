@@ -11,6 +11,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioIntensity, setAudioIntensity] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
+  const [displayMode, setDisplayMode] = useState('mesh'); // 'mesh' or 'particles'
   
   // Visual control states
   const [colorTop, setColorTop] = useState({ r: 102, g: 153, b: 255 }); // Blue
@@ -247,6 +248,7 @@ function App() {
         colorTop={colorTop}
         colorBottom={colorBottom}
         shapeParams={shapeParams}
+        displayMode={displayMode}
       />
 
       {/* Title */}
@@ -279,6 +281,8 @@ function App() {
         onShapeParamsChange={setShapeParams}
         isVisible={controlsVisible}
         onToggle={() => setControlsVisible(!controlsVisible)}
+        displayMode={displayMode}
+        onDisplayModeChange={setDisplayMode}
       />
 
       {/* Chat Container */}
