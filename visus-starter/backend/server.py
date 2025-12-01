@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from langchain_core.messages import HumanMessage
@@ -8,6 +8,7 @@ from openai import OpenAI
 import base64
 import os
 from config import OPENAI_API_KEY
+from connection import manager
 
 app = FastAPI()
 
@@ -51,5 +52,17 @@ async def chat_endpoint(req: ChatRequest):
         "audio": audio_base64, # Base64 編碼的 MP3
         "state": STATE
     }
+
+@app.websocket("/ws/omniverse")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            # Here we can handle messages FROM Omniverse if needed
+            # For now, we just print them
+            print(f"Message from Omniverse: {data}")
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
 
 # 啟動: uvicorn server:app --reload
