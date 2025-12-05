@@ -322,8 +322,6 @@ function App() {
         letterSpacing: '0.5px'
       }}>
         Langchain Interactive Template
-        {/* DEV Button (Hidden for now) */}
-        {/*
         <button 
             onClick={() => setIsDebugMode(true)}
             style={{
@@ -339,7 +337,6 @@ function App() {
         >
             DEV
         </button>
-        */}
       </div>
 
       {/* Visual Controls */}

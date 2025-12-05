@@ -93,6 +93,8 @@ This project now includes a robust Digital Twin rendering pipeline designed to v
 - **TwinManager**: Manages state synchronization between Backend (AI) and Frontend (3D). Implements smooth interpolation (Lerp/Slerp) for position, rotation, scale, and color updates (`frontend/src/systems/TwinManager.js`).
 - **AssetPipelineTest**: A dedicated test environment that implements a **Singleton Pattern** to ensure Three.js stability within React Strict Mode. It demonstrates a procedurally generated 6-axis robot arm with active gripper animation.
 
+> **How to Access**: Click the hidden "DEV" button in the top-right corner of the UI (next to the title) to toggle the Digital Twin debug view.
+
 ### Key Technical Solutions
 - **React Strict Mode Compatibility**: Uses a global Singleton instance for Scene/Renderer to prevent double-initialization issues common in React 18 development.
 - **Synchronous Asset Generation**: Ensures 3D objects are created and added to the scene graph synchronously to avoid "zombie object" issues during hot reloads.
