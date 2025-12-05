@@ -1,8 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ThreeBackground from './components/ThreeBackground';
 import VisualControls from './components/VisualControls';
+import AssetPipelineTest from './components/AssetPipelineTest';
 
 function App() {
+  // Dev Mode State
+  const [isDebugMode, setIsDebugMode] = useState(false);
+
   const [messages, setMessages] = useState([
     { role: 'assistant', content: '你好！我是 Francis，您的 AI 助手。有什麼我可以幫您的嗎？' }
   ]);
@@ -78,7 +82,7 @@ function App() {
             console.log('Silence detected, stopping recording...');
             recognitionRef.current.stop();
           }
-        }, 1200); // 1.2 seconds silence timeout
+        }, 800); // 0.8 seconds silence timeout
       }
     };
 
@@ -253,6 +257,32 @@ function App() {
     }
   };
 
+  // Render Dev Mode if active
+  if (isDebugMode) {
+    return (
+      <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#000' }}>
+        <button 
+          onClick={() => setIsDebugMode(false)}
+          style={{
+            position: 'absolute', 
+            top: 10, 
+            right: 10, 
+            zIndex: 9999,
+            background: 'rgba(255, 0, 0, 0.5)',
+            color: 'white',
+            border: '1px solid white',
+            padding: '5px 10px',
+            cursor: 'pointer',
+            fontFamily: 'monospace'
+          }}
+        >
+          Exit Dev Mode
+        </button>
+        <AssetPipelineTest />
+      </div>
+    );
+  }
+
   return (
     <div style={{
       width: '100vw',
@@ -292,6 +322,24 @@ function App() {
         letterSpacing: '0.5px'
       }}>
         Langchain Interactive Template
+        {/* DEV Button (Hidden for now) */}
+        {/*
+        <button 
+            onClick={() => setIsDebugMode(true)}
+            style={{
+                marginLeft: '10px',
+                background: 'transparent',
+                border: '1px solid rgba(255,255,255,0.3)',
+                color: 'rgba(255,255,255,0.5)',
+                cursor: 'pointer',
+                fontSize: '10px',
+                padding: '2px 6px',
+                borderRadius: '2px'
+            }}
+        >
+            DEV
+        </button>
+        */}
       </div>
 
       {/* Visual Controls */}

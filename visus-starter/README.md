@@ -84,6 +84,22 @@ Troubleshooting:
 
 中文（大綱）：可以控制燈光開關、顏色、排程等功能。
 
+## Digital Twin System (New Feature)
+
+This project now includes a robust Digital Twin rendering pipeline designed to visualize industrial assets (e.g., robot arms) controlled by AI.
+
+### Architecture
+- **SceneLoader**: Handles GLB asset loading, Draco compression decoding, and Scene Graph traversal to build an ID-based object map (`frontend/src/systems/SceneLoader.js`).
+- **TwinManager**: Manages state synchronization between Backend (AI) and Frontend (3D). Implements smooth interpolation (Lerp/Slerp) for position, rotation, scale, and color updates (`frontend/src/systems/TwinManager.js`).
+- **AssetPipelineTest**: A dedicated test environment that implements a **Singleton Pattern** to ensure Three.js stability within React Strict Mode. It demonstrates a procedurally generated 6-axis robot arm with active gripper animation.
+
+### Key Technical Solutions
+- **React Strict Mode Compatibility**: Uses a global Singleton instance for Scene/Renderer to prevent double-initialization issues common in React 18 development.
+- **Synchronous Asset Generation**: Ensures 3D objects are created and added to the scene graph synchronously to avoid "zombie object" issues during hot reloads.
+- **Hybrid Control**: Supports both "Teleport" (instant) and "Smooth" (interpolated) motion modes.
+
+中文（大綱）：新增數位孿生系統，包含 SceneLoader（資產加載）、TwinManager（狀態同步與補間）、AssetPipelineTest（單例模式測試環境）。解決了 React Strict Mode 下的重複渲染問題，並展示了六軸機械手臂的即時控制與夾爪動畫。
+
 ## Technical Stack
 
 ### Backend
