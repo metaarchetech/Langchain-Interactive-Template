@@ -12,7 +12,7 @@ export class TwinManager {
         
         // 補間速度係數 (0.0 ~ 1.0)
         // 數值越小越平滑但延遲越高，數值越大反應越快但可能生硬
-        this.lerpFactor = 0.02; 
+        this.lerpFactor = 0.1; 
     }
 
     /**

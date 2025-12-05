@@ -45,10 +45,12 @@ function ThreeBackground({
   const isPausedRef = useRef(false);
   
   // Mouse interaction refs
-  const isDraggingRef = useRef(false);
+  const isDraggingRef = useRef(false); // For Rotation (Middle Mouse)
+  const isPanningRef = useRef(false);  // For Panning (Right Mouse)
   const previousMousePositionRef = useRef({ x: 0, y: 0 });
   const sphereRotationRef = useRef({ x: 0, y: 0 });
   const rotationVelocityRef = useRef({ x: 0, y: 0 }); // For damping effect
+  const scenePositionRef = useRef({ x: 0, y: 0 }); // For Panning
 
   // Update refs when props change
   useEffect(() => {
@@ -71,7 +73,7 @@ function ThreeBackground({
       
       for (let i = 0; i < positionAttribute.count; i++) {
         const y = positionAttribute.getY(i);
-        const normalizedY = (y / 25 + 1) / 2;
+        const normalizedY = (y / 35 + 1) / 2;
         
         const r = (colorBottom.r + (colorTop.r - colorBottom.r) * normalizedY) / 255;
         const g = (colorBottom.g + (colorTop.g - colorBottom.g) * normalizedY) / 255;
@@ -167,7 +169,7 @@ function ThreeBackground({
 
     // ===== 4. Create Noise-Distorted Sphere with Gradient Material =====
     // Create sphere with high detail for smooth surface
-    const sphereGeometry = new THREE.SphereGeometry(25, 64, 64);
+    const sphereGeometry = new THREE.SphereGeometry(35, 64, 64); // Increased size from 25 to 35
     
     let sphere;
     
@@ -208,7 +210,7 @@ function ThreeBackground({
     
     for (let i = 0; i < positionAttribute.count; i++) {
       const y = positionAttribute.getY(i);
-      const normalizedY = (y / 25 + 1) / 2; // Normalize to 0-1
+      const normalizedY = (y / 35 + 1) / 2; // Normalize to 0-1 (Adjusted for radius 35)
       
       // Blue (top) to Pink (bottom) gradient - more vibrant
       const r = (colorBottomRef.current.r + (colorTopRef.current.r - colorBottomRef.current.r) * normalizedY) / 255;
@@ -279,6 +281,10 @@ function ThreeBackground({
       // Apply rotation to sphere
       sphere.rotation.x = sphereRotationRef.current.x;
       sphere.rotation.y = sphereRotationRef.current.y;
+      
+      // Apply panning to scene (or camera, but scene is easier here)
+      scene.position.x = scenePositionRef.current.x;
+      scene.position.y = scenePositionRef.current.y;
       
       // Apply noise distortion to vertices
       const positionAttribute = sphere.userData.positionAttribute;
@@ -351,28 +357,38 @@ function ThreeBackground({
 
     // ===== 8. Mouse Interaction =====
     const handleMouseDown = (event) => {
-      // Only respond to middle mouse button (scroll wheel button)
-      if (event.button !== 1) return;
-      
       event.preventDefault();
-      isDraggingRef.current = true;
-      setIsDragging(true);
       previousMousePositionRef.current = {
         x: event.clientX,
         y: event.clientY
       };
+
+      if (event.button === 1) { // Middle Button -> Rotate
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      } else if (event.button === 2) { // Right Button -> Pan
+        isPanningRef.current = true;
+        setIsDragging(true); // Reuse cursor grabbing style
+      }
     };
 
     const handleMouseMove = (event) => {
-      if (!isDraggingRef.current) return;
+      if (!isDraggingRef.current && !isPanningRef.current) return;
 
       const deltaX = event.clientX - previousMousePositionRef.current.x;
       const deltaY = event.clientY - previousMousePositionRef.current.y;
 
-      // Update rotation velocity for smooth damping
-      const sensitivity = 0.005;
-      rotationVelocityRef.current.x = deltaY * sensitivity;
-      rotationVelocityRef.current.y = deltaX * sensitivity;
+      if (isDraggingRef.current) {
+        // Rotate logic
+        const sensitivity = 0.005;
+        rotationVelocityRef.current.x = deltaY * sensitivity;
+        rotationVelocityRef.current.y = deltaX * sensitivity;
+      } else if (isPanningRef.current) {
+        // Pan logic
+        const panSensitivity = 0.1;
+        scenePositionRef.current.x += deltaX * panSensitivity;
+        scenePositionRef.current.y -= deltaY * panSensitivity;
+      }
 
       previousMousePositionRef.current = {
         x: event.clientX,
@@ -381,10 +397,8 @@ function ThreeBackground({
     };
 
     const handleMouseUp = (event) => {
-      // Only respond to middle mouse button
-      if (event.button !== 1) return;
-      
       isDraggingRef.current = false;
+      isPanningRef.current = false;
       setIsDragging(false);
     };
 
@@ -396,25 +410,27 @@ function ThreeBackground({
         const zoomSpeed = 0.05; // Reduced from 0.1 for more subtle zooming
         const newZ = cameraRef.current.position.z + event.deltaY * zoomSpeed;
         
-        // Limit zoom range (80 to 120) - Narrower range for subtler effect
-        cameraRef.current.position.z = Math.max(80, Math.min(120, newZ));
+        // Limit zoom range (40 to 150) - Allow closer zoom (larger object)
+        cameraRef.current.position.z = Math.max(40, Math.min(150, newZ));
       }
     };
 
-    // Prevent default middle mouse button behavior (auto-scroll)
-    const preventMiddleClick = (event) => {
-      if (event.button === 1) {
-        event.preventDefault();
-        return false;
-      }
+    // Prevent default middle mouse button behavior and Context Menu
+    const preventDefaults = (event) => {
+      event.preventDefault();
+      return false;
     };
     
     // Add event listeners
-    window.addEventListener('mousedown', handleMouseDown);
+    const container = mountRef.current;
+    if (container) {
+      container.addEventListener('mousedown', handleMouseDown);
+      container.addEventListener('contextmenu', preventDefaults); // Block Right Click Menu
+      container.addEventListener('wheel', handleWheel, { passive: false });
+    }
+    
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
-    window.addEventListener('auxclick', preventMiddleClick); // Prevent middle click default
-    window.addEventListener('wheel', handleWheel, { passive: false });
 
     // ===== 9. Cleanup on Unmount =====
     return () => {
@@ -429,11 +445,15 @@ function ThreeBackground({
       // Remove event listeners
       window.removeEventListener('resize', handleResize);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('mousedown', handleMouseDown);
+      
+      if (container) {
+        container.removeEventListener('mousedown', handleMouseDown);
+        container.removeEventListener('contextmenu', preventDefaults);
+        container.removeEventListener('wheel', handleWheel);
+      }
+      
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
-      window.removeEventListener('auxclick', preventMiddleClick);
-      window.removeEventListener('wheel', handleWheel);
 
       // Dispose Three.js resources
       if (rendererRef.current) {

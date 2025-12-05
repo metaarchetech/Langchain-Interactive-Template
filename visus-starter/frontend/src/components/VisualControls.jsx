@@ -12,23 +12,24 @@ function VisualControls({
   colorTop, 
   colorBottom, 
   onColorTopChange, 
-  onColorBottomChange,
-  shapeParams,
-  onShapeParamsChange,
-  isVisible,
-  onToggle,
-  displayMode,
-  onDisplayModeChange
+  onColorBottomChange, 
+  shapeParams, 
+  onShapeParamsChange, 
+  isVisible, 
+  onToggle, 
+  displayMode, 
+  onDisplayModeChange 
 }) {
   
   const sliderStyle = {
     flex: 1,
     height: '2px',
-    background: 'rgba(255,255,255,0.2)',
+    background: '#e0e0e0',
     outline: 'none',
     WebkitAppearance: 'none',
     appearance: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    borderRadius: '2px'
   };
   
   const containerStyle = {
@@ -36,22 +37,23 @@ function VisualControls({
     top: '75px',
     right: '20px',
     width: '250px',
-    background: 'rgba(10, 10, 10, 0.9)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(255,255,255,0.2)',
+    background: 'rgba(255, 255, 255, 0.4)',
+    backdropFilter: 'blur(16px)',
+    border: '1px solid rgba(0,0,0,0.1)',
     borderRadius: '4px',
     padding: '20px',
     zIndex: 10,
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '11px',
-    color: 'white',
-    transition: 'all 0.3s ease'
+    color: '#111',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.05)'
   };
 
   const sectionStyle = {
     marginBottom: '15px',
     paddingBottom: '15px',
-    borderBottom: '1px solid rgba(255,255,255,0.1)'
+    borderBottom: '1px solid #eee'
   };
 
   const rowStyle = {
@@ -63,11 +65,12 @@ function VisualControls({
 
   const labelStyle = {
     minWidth: '70px',
-    opacity: 0.7,
+    opacity: 0.6,
     fontSize: '9px',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
-    flexShrink: 0
+    flexShrink: 0,
+    color: '#333'
   };
 
   const valueStyle = {
@@ -75,14 +78,15 @@ function VisualControls({
     textAlign: 'right',
     opacity: 0.5,
     fontSize: '9px',
-    flexShrink: 0
+    flexShrink: 0,
+    color: '#111'
   };
 
   const toggleButtonStyle = {
     background: 'transparent',
     border: 'none',
-    borderBottom: isVisible ? '1px solid rgba(255,255,255,0.2)' : 'none',
-    color: 'white',
+    borderBottom: isVisible ? '1px solid #eee' : 'none',
+    color: '#111',
     padding: '0 0 10px 0',
     cursor: 'pointer',
     fontFamily: 'JetBrains Mono, monospace',
@@ -91,17 +95,18 @@ function VisualControls({
     marginBottom: isVisible ? '15px' : '0',
     width: '100%',
     textAlign: 'left',
-    fontWeight: '400'
+    fontWeight: '500'
   };
 
   const rgbSliderStyle = {
     flex: 1,
     height: '2px',
-    background: 'rgba(255,255,255,0.2)',
+    background: '#e0e0e0',
     outline: 'none',
     WebkitAppearance: 'none',
     appearance: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    borderRadius: '2px'
   };
 
   const colorRowStyle = {
@@ -114,14 +119,15 @@ function VisualControls({
   const buttonStyle = (isActive) => ({
     flex: 1,
     padding: '6px 0',
-    background: isActive ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
-    border: '1px solid rgba(255, 255, 255, 0.1)',
+    background: 'transparent',
+    border: isActive ? '1px solid #00cc66' : '1px solid #ccc',
     borderRadius: '2px',
-    color: isActive ? 'white' : 'rgba(255, 255, 255, 0.5)',
+    color: isActive ? '#00cc66' : '#666',
     cursor: 'pointer',
     fontFamily: 'JetBrains Mono, monospace',
     fontSize: '10px',
-    transition: 'all 0.2s'
+    transition: 'all 0.2s',
+    fontWeight: isActive ? 'bold' : 'normal'
   });
 
   return (
@@ -162,7 +168,7 @@ function VisualControls({
             <div style={{marginBottom: '10px'}}>
               <div style={{...labelStyle, marginBottom: '5px', opacity: 0.5, fontSize: '9px'}}>Top</div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>R</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>R</span>
                 <input
                   type="range"
                   min="0"
@@ -174,7 +180,7 @@ function VisualControls({
                 <span style={{minWidth: '28px', textAlign: 'right', fontSize: '9px', opacity: 0.5}}>{colorTop.r}</span>
               </div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>G</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>G</span>
                 <input
                   type="range"
                   min="0"
@@ -186,7 +192,7 @@ function VisualControls({
                 <span style={{minWidth: '28px', textAlign: 'right', fontSize: '9px', opacity: 0.5}}>{colorTop.g}</span>
               </div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>B</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>B</span>
                 <input
                   type="range"
                   min="0"
@@ -201,7 +207,7 @@ function VisualControls({
                 width: '100%',
                 height: '15px',
                 background: `rgb(${colorTop.r}, ${colorTop.g}, ${colorTop.b})`,
-                border: '1px solid rgba(255,255,255,0.2)',
+                border: '1px solid #eee',
                 borderRadius: '2px',
                 marginTop: '5px'
               }} />
@@ -211,7 +217,7 @@ function VisualControls({
             <div>
               <div style={{...labelStyle, marginBottom: '5px', opacity: 0.5, fontSize: '9px'}}>Bottom</div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>R</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>R</span>
                 <input
                   type="range"
                   min="0"
@@ -223,7 +229,7 @@ function VisualControls({
                 <span style={{minWidth: '28px', textAlign: 'right', fontSize: '9px', opacity: 0.5}}>{colorBottom.r}</span>
               </div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>G</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>G</span>
                 <input
                   type="range"
                   min="0"
@@ -235,7 +241,7 @@ function VisualControls({
                 <span style={{minWidth: '28px', textAlign: 'right', fontSize: '9px', opacity: 0.5}}>{colorBottom.g}</span>
               </div>
               <div style={colorRowStyle}>
-                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.7}}>B</span>
+                <span style={{minWidth: '12px', fontSize: '9px', opacity: 0.6}}>B</span>
                 <input
                   type="range"
                   min="0"
@@ -250,7 +256,7 @@ function VisualControls({
                 width: '100%',
                 height: '15px',
                 background: `rgb(${colorBottom.r}, ${colorBottom.g}, ${colorBottom.b})`,
-                border: '1px solid rgba(255,255,255,0.2)',
+                border: '1px solid #eee',
                 borderRadius: '2px',
                 marginTop: '5px'
               }} />
@@ -328,20 +334,23 @@ function VisualControls({
         input[type="range"]::-webkit-slider-thumb {
           -webkit-appearance: none;
           appearance: none;
-          width: 12px;
-          height: 12px;
-          background: white;
+          width: 10px;
+          height: 10px;
+          background: #00cc66;
           cursor: pointer;
           border-radius: 50%;
+          border: 1px solid #fff;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
         
         input[type="range"]::-moz-range-thumb {
-          width: 12px;
-          height: 12px;
-          background: white;
+          width: 10px;
+          height: 10px;
+          background: #00cc66;
           cursor: pointer;
           border-radius: 50%;
-          border: none;
+          border: 1px solid #fff;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.2);
         }
       `}</style>
     </div>
@@ -349,4 +358,3 @@ function VisualControls({
 }
 
 export default VisualControls;
-

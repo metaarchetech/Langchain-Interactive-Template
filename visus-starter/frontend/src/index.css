@@ -2,9 +2,20 @@
   font-family: 'JetBrains Mono', monospace;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0a0a0a;
+  
+  /* Light Theme Palette */
+  color-scheme: light;
+  --text-main: #111111;
+  --text-dim: #666666;
+  --accent-green: #00cc66;
+  --border-main: #333333;
+  --border-dim: #cccccc;
+  --bg-panel: rgba(255, 255, 255, 0.4); /* More transparent (60% transparent) */
+  --bg-body: #ffffff;
+
+  color: var(--text-main);
+  background-color: var(--bg-body);
+  
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -18,12 +29,40 @@ body {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background-color: #0a0a0a;
+  background-color: var(--bg-body);
 }
 
 #root {
   width: 100%;
   height: 100%;
+}
+
+/* Common Utility Classes for the new Design System */
+.tech-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-dim);
+  color: var(--text-main);
+  backdrop-filter: blur(12px); /* Stronger blur */
+}
+
+.tech-btn {
+  background: transparent;
+  border: 1px solid var(--border-main);
+  color: var(--text-main);
+  cursor: pointer;
+  font-family: 'JetBrains Mono', monospace;
+  transition: all 0.2s;
+}
+
+.tech-btn:hover {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+.tech-btn.active {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  font-weight: bold;
 }
 
 @keyframes pulse {

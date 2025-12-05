@@ -15,11 +15,11 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [audioIntensity, setAudioIntensity] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
-  const [displayMode, setDisplayMode] = useState('mesh'); // 'mesh' or 'particles'
+  const [displayMode, setDisplayMode] = useState('particles'); // Default to particles
   
   // Visual control states
-  const [colorTop, setColorTop] = useState({ r: 102, g: 153, b: 255 }); // Blue
-  const [colorBottom, setColorBottom] = useState({ r: 255, g: 51, b: 153 }); // Pink
+  const [colorTop, setColorTop] = useState({ r: 0, g: 255, b: 150 }); // Green
+  const [colorBottom, setColorBottom] = useState({ r: 150, g: 0, b: 255 }); // Purple
   const [shapeParams, setShapeParams] = useState({
     noiseScale: 0.3,
     baseStrength: 4.0,
@@ -108,10 +108,6 @@ function App() {
     recognition.onend = () => {
       setIsRecording(false);
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-      
-      // If stopped and input exists, send it
-      // We rely on stopRecording's logic, but this is a safety fallback
-      // Note: stopRecording has a delay, so we might want to unify this.
     };
 
     recognitionRef.current = recognition;
@@ -226,12 +222,7 @@ function App() {
     
     try {
       recognitionRef.current.stop();
-      // setIsRecording(false) will be handled by onend
-      
-      // Clear any silence timer
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-
-      // Auto-send after a short delay to ensure transcript is captured
       setTimeout(() => {
         if (input.trim()) {
           handleSend();
@@ -260,7 +251,7 @@ function App() {
   // Render Dev Mode if active
   if (isDebugMode) {
     return (
-      <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#000' }}>
+      <div style={{ width: '100vw', height: '100vh', position: 'relative', background: '#fff' }}>
         <button 
           onClick={() => setIsDebugMode(false)}
           style={{
@@ -268,13 +259,16 @@ function App() {
             top: 10, 
             right: 10, 
             zIndex: 9999,
-            background: 'rgba(255, 0, 0, 0.5)',
-            color: 'white',
-            border: '1px solid white',
+            background: 'transparent',
+            color: '#111',
+            border: '1px solid #333',
             padding: '5px 10px',
             cursor: 'pointer',
-            fontFamily: 'monospace'
+            fontFamily: 'JetBrains Mono, monospace',
+            transition: 'all 0.2s'
           }}
+          onMouseOver={(e) => { e.target.style.borderColor = '#00cc66'; e.target.style.color = '#00cc66'; }}
+          onMouseOut={(e) => { e.target.style.borderColor = '#333'; e.target.style.color = '#111'; }}
         >
           Exit Dev Mode
         </button>
@@ -288,7 +282,7 @@ function App() {
       width: '100vw',
       height: '100vh',
       background: 'transparent',
-      color: 'white',
+      color: '#111',
       display: 'flex',
       flexDirection: 'column',
       position: 'relative',
@@ -309,17 +303,18 @@ function App() {
         position: 'absolute',
         top: '20px',
         right: '20px',
-        background: 'rgba(10, 10, 10, 0.9)',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(255,255,255,0.2)',
+        background: 'rgba(255, 255, 255, 0.4)',
+        backdropFilter: 'blur(16px)',
+        border: '1px solid rgba(0,0,0,0.1)',
         borderRadius: '4px',
         padding: '12px 20px',
         zIndex: 10,
         fontFamily: 'JetBrains Mono, monospace',
         fontSize: '13px',
-        color: 'white',
+        color: '#111',
         fontWeight: '500',
-        letterSpacing: '0.5px'
+        letterSpacing: '0.5px',
+        pointerEvents: 'auto'
       }}>
         Langchain Interactive Template
         <button 
@@ -327,13 +322,16 @@ function App() {
             style={{
                 marginLeft: '10px',
                 background: 'transparent',
-                border: '1px solid rgba(255,255,255,0.3)',
-                color: 'rgba(255,255,255,0.5)',
+                border: '1px solid #999',
+                color: '#666',
                 cursor: 'pointer',
                 fontSize: '10px',
                 padding: '2px 6px',
-                borderRadius: '2px'
+                borderRadius: '2px',
+                transition: 'all 0.2s'
             }}
+            onMouseOver={(e) => { e.target.style.borderColor = '#00cc66'; e.target.style.color = '#00cc66'; }}
+            onMouseOut={(e) => { e.target.style.borderColor = '#999'; e.target.style.color = '#666'; }}
         >
             DEV
         </button>
@@ -367,7 +365,8 @@ function App() {
         gap: '20px',
         boxSizing: 'border-box',
         position: 'relative',
-        zIndex: 5
+        zIndex: 5,
+        pointerEvents: 'none' // Allow clicks to pass through to 3D background
       }}>
         {messages.map((msg, index) => (
           <div key={index} style={{
@@ -375,11 +374,12 @@ function App() {
             maxWidth: '70%',
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px'
+            gap: '5px',
+            pointerEvents: 'auto' // Re-enable clicks for messages
           }}>
             <div style={{
               fontSize: '11px',
-              color: 'rgba(255,255,255,0.5)',
+              color: '#666',
               alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start'
             }}>
               {msg.role === 'user' ? 'You' : 'Francis'}
@@ -387,10 +387,10 @@ function App() {
             <div style={{
               padding: '12px 16px',
               borderRadius: '4px',
-              background: 'rgba(10, 10, 10, 0.85)',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255,255,255,0.2)',
-              color: 'white',
+              background: msg.role === 'user' ? 'rgba(245, 245, 245, 0.6)' : 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(16px)',
+              border: '1px solid #e0e0e0',
+              color: '#111',
               lineHeight: '1.5',
               boxShadow: 'none'
             }}>
@@ -399,7 +399,7 @@ function App() {
           </div>
         ))}
         {isLoading && (
-          <div style={{ alignSelf: 'flex-start', color: 'rgba(255,255,255,0.5)', fontSize: '13px' }}>
+          <div style={{ alignSelf: 'flex-start', color: '#999', fontSize: '13px' }}>
             Thinking...
           </div>
         )}
@@ -413,12 +413,14 @@ function App() {
         left: 0,
         right: 0,
         padding: '20px',
-        background: 'rgba(10, 10, 10, 0.9)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(255, 255, 255, 0.4)',
+        backdropFilter: 'blur(16px)',
+        borderTop: '1px solid #eee',
         display: 'flex',
         justifyContent: 'center',
         boxSizing: 'border-box',
-        zIndex: 5
+        zIndex: 5,
+        pointerEvents: 'auto'
       }}>
         <div style={{
           width: '100%',
@@ -431,11 +433,10 @@ function App() {
             flex: 1,
             display: 'flex',
             gap: '10px',
-            background: 'rgba(10, 10, 10, 0.7)',
-            backdropFilter: 'blur(10px)',
+            background: 'rgba(255, 255, 255, 0.3)',
             padding: '10px',
             borderRadius: '4px',
-            border: '1px solid rgba(255,255,255,0.2)',
+            border: '1px solid #e0e0e0',
             boxShadow: 'none'
           }}>
           <input
@@ -449,7 +450,7 @@ function App() {
               flex: 1,
               background: 'transparent',
               border: 'none',
-              color: 'white',
+              color: '#111',
               outline: 'none',
               padding: '0 10px',
               fontSize: '14px',
@@ -467,9 +468,9 @@ function App() {
               onTouchEnd={handleMouseUp}
               disabled={isLoading}
               style={{
-                background: '#0a0a0a',
-                color: isRecording ? '#ff4444' : 'white',
-                border: isRecording ? '1px solid #ff4444' : '1px solid rgba(255,255,255,0.2)',
+                background: 'transparent',
+                color: isRecording ? '#ff4444' : '#111',
+                border: isRecording ? '1px solid #ff4444' : '1px solid #ccc',
                 padding: '10px 16px',
                 borderRadius: '4px',
                 cursor: isLoading ? 'not-allowed' : 'pointer',
@@ -491,9 +492,9 @@ function App() {
             onClick={handleSend}
             disabled={isLoading || isRecording}
             style={{
-              background: '#0a0a0a',
-              color: 'white',
-              border: '1px solid rgba(255,255,255,0.2)',
+              background: 'transparent',
+              color: '#111',
+              border: '1px solid #ccc',
               padding: '10px 20px',
               borderRadius: '4px',
               cursor: (isLoading || isRecording) ? 'not-allowed' : 'pointer',
@@ -503,6 +504,8 @@ function App() {
               fontFamily: 'JetBrains Mono, monospace',
               fontSize: '13px'
             }}
+            onMouseOver={(e) => { if(!isLoading && !isRecording) { e.target.style.borderColor = '#00cc66'; e.target.style.color = '#00cc66'; } }}
+            onMouseOut={(e) => { if(!isLoading && !isRecording) { e.target.style.borderColor = '#ccc'; e.target.style.color = '#111'; } }}
           >
             Send
           </button>
